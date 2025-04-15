@@ -1,0 +1,51 @@
+//search.html
+<!DOCTYPE html>
+<html>
+<head><title>Search Employee</title></head>
+<body>
+    <form action="EmployeeServlet" method="get">
+        Enter Employee ID: <input type="text" name="empid">
+        <input type="submit" value="Search">
+    </form>
+</body>
+</html>
+
+
+//EmployeeServelet.java
+import java.io.*;
+import java.sql.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+public class EmployeeServlet extends HttpServlet {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        String id = request.getParameter("empid");
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection conn = DriverManager.getConnection(
+                "jdbc:mysql://localhost:3306/yourDatabase", "yourUsername", "yourPassword");
+            Statement stmt = conn.createStatement();
+
+            String query = "SELECT * FROM Employee WHERE EmpID = " + id;
+            ResultSet rs = stmt.executeQuery(query);
+
+            if (rs.next()) {
+                out.println("<h3>Employee Details</h3>");
+                out.println("ID: " + rs.getInt("EmpID") + "<br>");
+                out.println("Name: " + rs.getString("Name") + "<br>");
+                out.println("Salary: " + rs.getDouble("Salary") + "<br>");
+            } else {
+                out.println("Employee not found.");
+            }
+
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace(out);
+        }
+    }
+}
